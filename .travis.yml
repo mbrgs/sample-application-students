@@ -20,7 +20,7 @@ script:
     -Dsonar.projectKey=mbrgs_sample-application-students \
     -Dsonar.organization=mbrgs-github \
     -Dsonar.host.url=https://sonarcloud.io \
-    -Dsonar.login=a621a85050285c569aed55b43152c3d34f2b8262
+    -Dsonar.login=$SONAR_TOKEN
 
 # Cache the .m2 folder to prevent redownloading dependencies on each build
 cache:
