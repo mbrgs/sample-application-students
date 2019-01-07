@@ -33,8 +33,25 @@ cache:
 env:
   global:
     - secure: "ankWDSPnn4uTHIxm+FSZGcgaCXmK0dEU+ne0rgWhU+DhQ/l71DGBfRrn5vuvsXUApss1di2Wsj5tO6y9fIj7Vs0cUr3417K7ONuc6xwvRBhRfLxMMj5fJt4unCaejj+MweQ4oAJg2nMAH0EtR7Rut8YpLVYWovwXvFIGHYHAoC752rFZuMPDHnhapSd7+ZMdwYo1l7C2ZZOBbSm6Vh/Z9alQINIOqZ60UVSmCLMVV0erJrkqxikUxiSCdAeOt6T4xbrRPXiAMHzA5CKivCfLf+6QoXLd/1J1Mujj0wvneUiggI0Ty+02N+K/HmaJAe+jLjk72BGnd1AbAYDW1zoLgVPWKhrCJdhDkZ8Ori3lmarpvGIsTe9UOUAPclGaBNN08y6xzdS/C9FtSdy5+IcsgbaHceY5s4bJsHPcixAY0mq8EhFOyZzfEBJUp0LAelFA+1JpjtcfUhmkc5R+pQStLY+mp5mYteZtuiDfVPZemhGP0RIAe+gMZak/J8QNG92BPPR2eiZBxqVw3egdV++dKLrtBMJshRzMLGr7+i1I0SvtIXRapAaAtsatBfA8UXO8fZlBNzd5RfOCmRv4RCMc9+sbyyBSO3TQrWuIDHYX4gR/wIgsBxLaGEWenyuIXR3MFpEdxy/bUrJBwilwJZucmvgIrcPwuDgVSLYrghghpq8="
+    - secure: "ca9x2Df73Zur4cuMJYcpHuTZ8qhKE5EtNiX4GzloiupqmAQHItRbRTYMqRDODiefu6MWbzoh2a36QrBXiDWdTuw0wmyxGjgj/KTBgNFU4E5hohMVLBs/E3m/47kK74g4tSxGq6ngwdUJjp0QESmdFr1CLwv4Y0ZP9zqdMXlErS++jDI5zzcD6XGwiUjTY8QbulX3P1hTsVc4iQrYKJjqn4L1iZYlk/Ic4inEb5iqXSEhjNOkFRe+OqR9J6S3hPr9vdjWDxpEhCah2YT1eUNM/5U8TsWxrILaRbiXmS4DUGwgX94P9n5u+CqF1EOOqXmivuER/Qr0lPbPfADuIhJGkQx3Lal53ocAL9EMs2b8T2UstHMqFsIGBv4FCNntCp9M2FUmoGsy3AdqVr9R5MeXva1O1I3GXEhDtqpHwBZMHd718rmmCqVVdXhPxfMtQg8brLNcRmVu6FgSXy4AGUarRsglmWcccReAwtE8TAOuLAM+XDq0Ryqkay/tO3DNBv4H1sP7YObWZTmm2WUZILfXho0fb9GRE3ERVRThHoAwS8V3oGi1QbXiCIoDbtomBC+gjRfE8TRjo31JGnBSwcMlWj+99lgVC87VgZdKQ5f8u2c2POltImjWAQMw+Ej3doaZPFFHPkJBkhX+DAsQA0IkaHFTh5LF/iLV3OMRV93vias="
+    - secure: "sL6PUHYPZdXW43HMECeaOv5mbpArho5raEzakQ11m3sIAow20dsQaDupy9ufHinr6E5xueI4Xbxgp7nExSy1faoCMXLpBl/7k66aoK7pC2rxMDlMb26zKdztXn95GXN2bWyH388NeIDvNYN5T4H+m+0d7BdqsyQXdoUh0VNVewaFawEdBGpFmjp5qr1ZXSnV2m1oOMiBp7bKbo4zoaQtfk8CyZu3TzhaWCeI4M4HYZs+eHAsMGNthvPFDDEvH1pP1wgvUrMhE8+LWE7EIOJtx18RW8hXFS6j0b6EIG6CPF2w2n7eTIAAONgcukdiqDx4vSU/QKBIgsbnbQbWUv1CE+q3I7GNyP7eOsh/NqQ9nD526cqhZTigGuaIrHECmEsxGmrPUP+BVtYuYkAR+xiIGeN3zVNB2M20SEbLQkfHdsT9kpRPQf4Q6ZKgtrCwRAC/mKTrjTxU959zoW/thdj/0o3dHMcq168ir/mjdyHDPkYHFDoZbEU9aYodgzylowJ/ugi7nW6dL5wiJeVlpRlV0BYkMFsnn3v/85dSDaKRD495lYVF+fqW+Z9Vq5YCtS66yfaWHoHcVcYNz3AHvQraDgZrw+48fTcpTZzS7j406n7SIBu1OL0P/oiSXK2j7CWrn+KPTYNKqALwXrDDboS57H5MLqp6SRLVBSulIkVnSec="
 
 # Send an email to the commiter if the pipeline failed at some point
 notifications:
   email:
     on_failure: always
+
+# Build an image containing the .jar and push it to the Docker Hub
+after_success:
+  # Login to Docker hub
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  # Tag text according to the branch
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+  # Image name
+  - export IMAGE_NAME=takimatraining/sample-application
+  # Build the image (see Dockerfile) and tag it with the commit ID
+  - docker build -t $IMAGE_NAME:$TRAVIS_COMMIT .
+  # Retag the image with the previously choosen tag
+  - docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:$TAG
+  # Push the tagged image to Docker Hub
+  - docker push $IMAGE_NAME:$TAG
