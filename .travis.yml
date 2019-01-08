@@ -4,16 +4,19 @@ services:
 - docker
 before_install:
 - openssl aes-256-cbc -K $encrypted_afcc178eda05_key -iv $encrypted_afcc178eda05_iv
-  -in id_rsa_insa_training.key.enc -out ../id_rsa_insa_training.key -d
+  -in travis_deploy_rsa.enc -out travis_deploy_rsa -d
 - sudo service mysql stop
 - docker pull takimatraining/devops-training-db
 - docker run -d -p 127.0.0.1:3306:3306 takimatraining/devops-training-db
+- chmod 600 /tmp/travis_deploy_rsa
+- eval "$(ssh-agent -s)"
+- ssh-add /tmp/travis_deploy_rsa
+- echo -e "Host $SERVER_HOST\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 env:
   global:
-  - secure: "gRogjvQr+aOABPjg1/wHAep0R4q9OIZEGn0CKVzEOghcIZsGQ8GTKbp0cmcmfQPMMhkTere9iQQbYnPd49iHvrbxiUXcH7XizDQE/iPA1jnnAYQgABeNuQmW4CPoWYpJoEls2YNO8s8h+1tiLfTnb/4WGdLOT7NfUvTVyEBcdHFiST37SKjTGcUrAbgTRVFcD7ivM3UbAiPDeoY2KhTF80UZBmch/oqMvg+i71lF4N5UVpT43n72FhS0nGSzlpwmw8dHuCU/qfqQQytarkAnasKCjBBxXUX+IybqjCnivdrK8kq8RkBXIs6fyB9BwuzYqAj8rhnRh+Dtd9EWwGSjOl+8P5eFiTiaPfnSNKSdTxTgzHbuimX4oOykLFpCsDdhxi+wTm4AoiYfnaP4a5sYxdLc72prig8WJuaTjk4+P0b/KAAcNiSFcoQuvuZBReASQstUzavjqWe8r4gvnsDsW1ApeIgThc8ltoe4zKW2PL3Rzn2aaYQnidA2dJrODxhlExpt0j14y/T7mnbfsgxH+iA0sldpzU9jWt9iIb1mf9SOSMOBHwRzamzxi81kfEmOGv8jVcYP/E+j9fHsG2g5/5rsq/8wiuP/U1GdkeUrSItU7Yy1GQtjDrarvtVNlVmm7cHGJgX8UxQzgKNYtozS7V1WaSWUiXKnrRj/MtIPSeQ="
-  - secure: "rSFiE4ZpXO9gG8IKxQSX/ylB85hWVP2C7STAs5T3bTChgMDG4PORAjfu28ZsC2JAvJjirlU6xSaGnaaR0yi2FFQ6qjmPJsm1TIRiDTDX4w7K/Eh2fB7rOWVpifFKtol+8vylAhN/SIJXxBr9sydbKqYd40NSqlYSGYleUQeLHd+HRMhrrojFnzKD+EKDKbKHgQb4s9kGqP96q7PnqfAHEUC0yEoz/BfpCQMC7RVM9DN03pIlkUmac1Y13/0j3g40Xu8VCXEM0vWtqu2gDml28NM9p54DGWWRvebeOSFOKsm04pLbqeI/9ABL+5Wed9xEG52g4CAItjbFazXEh7qXRhj0eKvNSuJVsX8QCCd6EsLM6xVevny3JdKOt9gfmuZcEZ+gkvXvyCcBtQjsH5WsmQ5ES71K6ubRFaYrofa7pmxmQWEJ1UBR7J2u0fLMk2LMENp3Ebcb9l2Ih/xH3LEpiklT/wZW/rxYLA+UFvXUpuSy8i69PJ0kKOzQ5RM/9URfvhv6noIinmOONEQ2jc16xYkr8pGcISHTHst7iQazVCxA8Z6xaHcyCuJ30lRmAkmWxTigNYmLPj8V9XePB56nHZpU8/UVhKnF+x9T4adKhSjoTfo8MXDxParnyz91/Lm3gXAPHdddu4p2meiR0vCZNia/6Y83l4v/wD2ZoKuevZ8="
-  - secure: "VsL1tyxHLwJNknogttVhLP9Ivm6mYh5AzkBKIVqxozTASs+DhtCznoPN/FN7/SEnX39tgi4idnEtQRpBj9OMZZGKT3rCrRCNb5UbDSFtPAsD1jfbqI49r/ZWrhDSalWfXm6UaED9R/xRVaQDS/uSoVrQwuYXslbipoKASXqY7nx2JbPnr4t68eNSrl3V/0wtwcsWiZB+ETId043smEsNCtBQohL7GIEWaabLJ5gbRl7qil5bDw6K0jv+9SZt+8a6OBKwsDKhXM53eS8u2mWeG4ROcpmbgZlMTxHzc33kVPJcm3l77+izbt+Vn1cZzLLt2yXVMVMKNodcye8TD9RPRWMWpHyUz4zs0/lbt5eY+trWm7WdRGL5NcPGChtcPNf2jurzzED3KzAdeS97GWy6WGSdU2pdmxpabqa3ZSzIqb9mPgHtbCMYvUcFgXhpIT1V8kAUSDjb1eGvjCmtv+zzGc1je2P4a2ltmN9AEYCpSqTk7/kNt0Irw6yolT1RU/Y3n43oa/+5QHm100PzN0ZRzZ4tY4YlzKIbveXNIxf9loEo+iyzjeoKAOScYS28xWthd/FjXTJ87kXNH1ub/sy4K8y5WUD8rzNotucGl+BRcxftMjhdR1IshHeOyTTbn9scSDqRyewGMzN0CSlAhmnAN7+ALfhobBypgfjSslMw4OQ="
-
+  - secure: gRogjvQr+aOABPjg1/wHAep0R4q9OIZEGn0CKVzEOghcIZsGQ8GTKbp0cmcmfQPMMhkTere9iQQbYnPd49iHvrbxiUXcH7XizDQE/iPA1jnnAYQgABeNuQmW4CPoWYpJoEls2YNO8s8h+1tiLfTnb/4WGdLOT7NfUvTVyEBcdHFiST37SKjTGcUrAbgTRVFcD7ivM3UbAiPDeoY2KhTF80UZBmch/oqMvg+i71lF4N5UVpT43n72FhS0nGSzlpwmw8dHuCU/qfqQQytarkAnasKCjBBxXUX+IybqjCnivdrK8kq8RkBXIs6fyB9BwuzYqAj8rhnRh+Dtd9EWwGSjOl+8P5eFiTiaPfnSNKSdTxTgzHbuimX4oOykLFpCsDdhxi+wTm4AoiYfnaP4a5sYxdLc72prig8WJuaTjk4+P0b/KAAcNiSFcoQuvuZBReASQstUzavjqWe8r4gvnsDsW1ApeIgThc8ltoe4zKW2PL3Rzn2aaYQnidA2dJrODxhlExpt0j14y/T7mnbfsgxH+iA0sldpzU9jWt9iIb1mf9SOSMOBHwRzamzxi81kfEmOGv8jVcYP/E+j9fHsG2g5/5rsq/8wiuP/U1GdkeUrSItU7Yy1GQtjDrarvtVNlVmm7cHGJgX8UxQzgKNYtozS7V1WaSWUiXKnrRj/MtIPSeQ=
+  - secure: rSFiE4ZpXO9gG8IKxQSX/ylB85hWVP2C7STAs5T3bTChgMDG4PORAjfu28ZsC2JAvJjirlU6xSaGnaaR0yi2FFQ6qjmPJsm1TIRiDTDX4w7K/Eh2fB7rOWVpifFKtol+8vylAhN/SIJXxBr9sydbKqYd40NSqlYSGYleUQeLHd+HRMhrrojFnzKD+EKDKbKHgQb4s9kGqP96q7PnqfAHEUC0yEoz/BfpCQMC7RVM9DN03pIlkUmac1Y13/0j3g40Xu8VCXEM0vWtqu2gDml28NM9p54DGWWRvebeOSFOKsm04pLbqeI/9ABL+5Wed9xEG52g4CAItjbFazXEh7qXRhj0eKvNSuJVsX8QCCd6EsLM6xVevny3JdKOt9gfmuZcEZ+gkvXvyCcBtQjsH5WsmQ5ES71K6ubRFaYrofa7pmxmQWEJ1UBR7J2u0fLMk2LMENp3Ebcb9l2Ih/xH3LEpiklT/wZW/rxYLA+UFvXUpuSy8i69PJ0kKOzQ5RM/9URfvhv6noIinmOONEQ2jc16xYkr8pGcISHTHst7iQazVCxA8Z6xaHcyCuJ30lRmAkmWxTigNYmLPj8V9XePB56nHZpU8/UVhKnF+x9T4adKhSjoTfo8MXDxParnyz91/Lm3gXAPHdddu4p2meiR0vCZNia/6Y83l4v/wD2ZoKuevZ8=
+  - secure: VsL1tyxHLwJNknogttVhLP9Ivm6mYh5AzkBKIVqxozTASs+DhtCznoPN/FN7/SEnX39tgi4idnEtQRpBj9OMZZGKT3rCrRCNb5UbDSFtPAsD1jfbqI49r/ZWrhDSalWfXm6UaED9R/xRVaQDS/uSoVrQwuYXslbipoKASXqY7nx2JbPnr4t68eNSrl3V/0wtwcsWiZB+ETId043smEsNCtBQohL7GIEWaabLJ5gbRl7qil5bDw6K0jv+9SZt+8a6OBKwsDKhXM53eS8u2mWeG4ROcpmbgZlMTxHzc33kVPJcm3l77+izbt+Vn1cZzLLt2yXVMVMKNodcye8TD9RPRWMWpHyUz4zs0/lbt5eY+trWm7WdRGL5NcPGChtcPNf2jurzzED3KzAdeS97GWy6WGSdU2pdmxpabqa3ZSzIqb9mPgHtbCMYvUcFgXhpIT1V8kAUSDjb1eGvjCmtv+zzGc1je2P4a2ltmN9AEYCpSqTk7/kNt0Irw6yolT1RU/Y3n43oa/+5QHm100PzN0ZRzZ4tY4YlzKIbveXNIxf9loEo+iyzjeoKAOScYS28xWthd/FjXTJ87kXNH1ub/sy4K8y5WUD8rzNotucGl+BRcxftMjhdR1IshHeOyTTbn9scSDqRyewGMzN0CSlAhmnAN7+ALfhobBypgfjSslMw4OQ=
 script:
 - mvn verify
 - |
@@ -22,19 +25,20 @@ script:
   -Dsonar.organization=mbrgs-github \
   -Dsonar.host.url=https://sonarcloud.io \
   -Dsonar.login=$SONAR_TOKEN
-
-# Login to Docker hub
 - docker login -u $DOCKER_USER -p $DOCKER_PASS
-# Tag text according to the branch
-- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
-# Image name
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH;
+  fi`
 - export IMAGE_NAME=mbrgs/sample-application-students
-# Build the image (see Dockerfile) and tag it with the commit ID
 - docker build -t $IMAGE_NAME:$TRAVIS_COMMIT .
-# Retag the image with the previously choosen tag
 - docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:$TAG
-# Push the tagged image to Docker Hub
 - docker push $IMAGE_NAME:$TAG
+
+deploy:
+  provider: script
+  script: ssh -i /tmp/travis_deploy_rsa $DEPLOY_USER@$SERVER_HOST "sudo docker pull $IMAGE_NAME:$TAG && sudo docker rm -f app || true && sudo docker run -d --network net -p 80:8080 --name app $IMAGE_NAME:$TAG"
+  on:
+    branch: master
+
 cache:
   directories:
   - "$HOME/.m2/repository"
