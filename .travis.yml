@@ -1,54 +1,36 @@
 language: java
 jdk: oraclejdk8
-
-# Define the services to use
 services:
-  - docker
-
+- docker
 before_install:
-  - sudo service mysql stop
-  - docker pull takimatraining/devops-training-db
-  - docker run -d -p 127.0.0.1:3306:3306 takimatraining/devops-training-db
-
-
-# Run Unit Test and Integration Tests
-# The pipe (|) is useful to create multiline scripts
+- openssl aes-256-cbc -K $encrypted_afcc178eda05_key -iv $encrypted_afcc178eda05_iv
+  -in id_rsa_insa_training.key.enc -out ../id_rsa_insa_training.key -d
+- sudo service mysql stop
+- docker pull takimatraining/devops-training-db
+- docker run -d -p 127.0.0.1:3306:3306 takimatraining/devops-training-db
 script:
-  - mvn verify
-  - |
-    mvn clean install sonar:sonar \
-    -Dsonar.projectKey=mbrgs_sample-application-students \
-    -Dsonar.organization=mbrgs-github \
-    -Dsonar.host.url=https://sonarcloud.io \
-    -Dsonar.login=$SONAR_TOKEN
-  # Login to Docker hub
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  # Tag text according to the branch
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
-  # Image name
-  - export IMAGE_NAME=takimatraining/sample-application
-  # Build the image (see Dockerfile) and tag it with the commit ID
-  - docker build -t $IMAGE_NAME:$TRAVIS_COMMIT .
-  # Retag the image with the previously choosen tag
-  - docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:$TAG
-  # Push the tagged image to Docker Hub
-  - docker push $IMAGE_NAME:$TAG
-
-# Cache the .m2 folder to prevent redownloading dependencies on each build
+- mvn verify
+- |
+  mvn clean install sonar:sonar \
+  -Dsonar.projectKey=mbrgs_sample-application-students \
+  -Dsonar.organization=mbrgs-github \
+  -Dsonar.host.url=https://sonarcloud.io \
+  -Dsonar.login=$SONAR_TOKEN
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH;
+  fi`
+- export IMAGE_NAME=takimatraining/sample-application
+- docker build -t $IMAGE_NAME:$TRAVIS_COMMIT .
+- docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:$TAG
+- docker push $IMAGE_NAME:$TAG
 cache:
   directories:
   - "$HOME/.m2/repository"
-
-# Environment variables are strings (double quotes)
-# Example:
-# - secure: "DpR1th9rZvLMX0......"
 env:
   global:
-    - secure: "gRogjvQr+aOABPjg1/wHAep0R4q9OIZEGn0CKVzEOghcIZsGQ8GTKbp0cmcmfQPMMhkTere9iQQbYnPd49iHvrbxiUXcH7XizDQE/iPA1jnnAYQgABeNuQmW4CPoWYpJoEls2YNO8s8h+1tiLfTnb/4WGdLOT7NfUvTVyEBcdHFiST37SKjTGcUrAbgTRVFcD7ivM3UbAiPDeoY2KhTF80UZBmch/oqMvg+i71lF4N5UVpT43n72FhS0nGSzlpwmw8dHuCU/qfqQQytarkAnasKCjBBxXUX+IybqjCnivdrK8kq8RkBXIs6fyB9BwuzYqAj8rhnRh+Dtd9EWwGSjOl+8P5eFiTiaPfnSNKSdTxTgzHbuimX4oOykLFpCsDdhxi+wTm4AoiYfnaP4a5sYxdLc72prig8WJuaTjk4+P0b/KAAcNiSFcoQuvuZBReASQstUzavjqWe8r4gvnsDsW1ApeIgThc8ltoe4zKW2PL3Rzn2aaYQnidA2dJrODxhlExpt0j14y/T7mnbfsgxH+iA0sldpzU9jWt9iIb1mf9SOSMOBHwRzamzxi81kfEmOGv8jVcYP/E+j9fHsG2g5/5rsq/8wiuP/U1GdkeUrSItU7Yy1GQtjDrarvtVNlVmm7cHGJgX8UxQzgKNYtozS7V1WaSWUiXKnrRj/MtIPSeQ="
-    - secure: "iaoLXeyQmTWuHNc7Y3ArxCV5teQ1b25LwdEo6UL7D+H7+beWVN608U9qc41lguLxIu8qRtgqARHU922Tcam4vgLnkZujyginmeu562KkYphcPr9qqu73YdLF4xfpi/kxN0PL4bE8EwIkVUQXDcdCVU060RzwHaEHJf67VFVr6jZFKi+Qgp2B1TyqnYbSgSLmw+APBDLmWGVOnc5nLAv0zrBP8T3YVjkbS1jrYJ7sk5gsrhzn03ZNwkILUd319rJTmp4fx1ODMg7tc9dzga5BU8MrlKvPvWZV78zW+0+V1taKcXOzQMZMt6IxLIsSZBcFpXqihfx4Tq1VYaxHhAHCozXhe4D5hYEoGJ0xSJfYy1rsSUCTiZ1tVBSiAs+l8MBEzm0UtDB5tK2+DdZWXfj4+7MWRBROynuVkHN/0FWBJfVtkS545eLkxVxszj78A1VC+3+XAfizLYI8EcB3TCSrgZTSgqIvlQGK5LMfetpfbWO2TGng7B92U6M7URfGYokoWS27tegUtoHHY4QN2VifWHAcaD2uINHsJ04WVcXmcnp1jTMAPIuLZYfXzuzoZDZtKYNaEQsm6wJIaL9lYDfOoOhI5hvWUQrcDG9xnUCi5wxpXnjnr64hN6Bh/VYLvXXP/9lpt6CFXYqJu0K/VZFIHOgeUuUD18vLKQZlThtufWc="
-    - secure: "VsL1tyxHLwJNknogttVhLP9Ivm6mYh5AzkBKIVqxozTASs+DhtCznoPN/FN7/SEnX39tgi4idnEtQRpBj9OMZZGKT3rCrRCNb5UbDSFtPAsD1jfbqI49r/ZWrhDSalWfXm6UaED9R/xRVaQDS/uSoVrQwuYXslbipoKASXqY7nx2JbPnr4t68eNSrl3V/0wtwcsWiZB+ETId043smEsNCtBQohL7GIEWaabLJ5gbRl7qil5bDw6K0jv+9SZt+8a6OBKwsDKhXM53eS8u2mWeG4ROcpmbgZlMTxHzc33kVPJcm3l77+izbt+Vn1cZzLLt2yXVMVMKNodcye8TD9RPRWMWpHyUz4zs0/lbt5eY+trWm7WdRGL5NcPGChtcPNf2jurzzED3KzAdeS97GWy6WGSdU2pdmxpabqa3ZSzIqb9mPgHtbCMYvUcFgXhpIT1V8kAUSDjb1eGvjCmtv+zzGc1je2P4a2ltmN9AEYCpSqTk7/kNt0Irw6yolT1RU/Y3n43oa/+5QHm100PzN0ZRzZ4tY4YlzKIbveXNIxf9loEo+iyzjeoKAOScYS28xWthd/FjXTJ87kXNH1ub/sy4K8y5WUD8rzNotucGl+BRcxftMjhdR1IshHeOyTTbn9scSDqRyewGMzN0CSlAhmnAN7+ALfhobBypgfjSslMw4OQ="
-
-# Send an email to the commiter if the pipeline failed at some point
+  - secure: gRogjvQr+aOABPjg1/wHAep0R4q9OIZEGn0CKVzEOghcIZsGQ8GTKbp0cmcmfQPMMhkTere9iQQbYnPd49iHvrbxiUXcH7XizDQE/iPA1jnnAYQgABeNuQmW4CPoWYpJoEls2YNO8s8h+1tiLfTnb/4WGdLOT7NfUvTVyEBcdHFiST37SKjTGcUrAbgTRVFcD7ivM3UbAiPDeoY2KhTF80UZBmch/oqMvg+i71lF4N5UVpT43n72FhS0nGSzlpwmw8dHuCU/qfqQQytarkAnasKCjBBxXUX+IybqjCnivdrK8kq8RkBXIs6fyB9BwuzYqAj8rhnRh+Dtd9EWwGSjOl+8P5eFiTiaPfnSNKSdTxTgzHbuimX4oOykLFpCsDdhxi+wTm4AoiYfnaP4a5sYxdLc72prig8WJuaTjk4+P0b/KAAcNiSFcoQuvuZBReASQstUzavjqWe8r4gvnsDsW1ApeIgThc8ltoe4zKW2PL3Rzn2aaYQnidA2dJrODxhlExpt0j14y/T7mnbfsgxH+iA0sldpzU9jWt9iIb1mf9SOSMOBHwRzamzxi81kfEmOGv8jVcYP/E+j9fHsG2g5/5rsq/8wiuP/U1GdkeUrSItU7Yy1GQtjDrarvtVNlVmm7cHGJgX8UxQzgKNYtozS7V1WaSWUiXKnrRj/MtIPSeQ=
+  - secure: iaoLXeyQmTWuHNc7Y3ArxCV5teQ1b25LwdEo6UL7D+H7+beWVN608U9qc41lguLxIu8qRtgqARHU922Tcam4vgLnkZujyginmeu562KkYphcPr9qqu73YdLF4xfpi/kxN0PL4bE8EwIkVUQXDcdCVU060RzwHaEHJf67VFVr6jZFKi+Qgp2B1TyqnYbSgSLmw+APBDLmWGVOnc5nLAv0zrBP8T3YVjkbS1jrYJ7sk5gsrhzn03ZNwkILUd319rJTmp4fx1ODMg7tc9dzga5BU8MrlKvPvWZV78zW+0+V1taKcXOzQMZMt6IxLIsSZBcFpXqihfx4Tq1VYaxHhAHCozXhe4D5hYEoGJ0xSJfYy1rsSUCTiZ1tVBSiAs+l8MBEzm0UtDB5tK2+DdZWXfj4+7MWRBROynuVkHN/0FWBJfVtkS545eLkxVxszj78A1VC+3+XAfizLYI8EcB3TCSrgZTSgqIvlQGK5LMfetpfbWO2TGng7B92U6M7URfGYokoWS27tegUtoHHY4QN2VifWHAcaD2uINHsJ04WVcXmcnp1jTMAPIuLZYfXzuzoZDZtKYNaEQsm6wJIaL9lYDfOoOhI5hvWUQrcDG9xnUCi5wxpXnjnr64hN6Bh/VYLvXXP/9lpt6CFXYqJu0K/VZFIHOgeUuUD18vLKQZlThtufWc=
+  - secure: VsL1tyxHLwJNknogttVhLP9Ivm6mYh5AzkBKIVqxozTASs+DhtCznoPN/FN7/SEnX39tgi4idnEtQRpBj9OMZZGKT3rCrRCNb5UbDSFtPAsD1jfbqI49r/ZWrhDSalWfXm6UaED9R/xRVaQDS/uSoVrQwuYXslbipoKASXqY7nx2JbPnr4t68eNSrl3V/0wtwcsWiZB+ETId043smEsNCtBQohL7GIEWaabLJ5gbRl7qil5bDw6K0jv+9SZt+8a6OBKwsDKhXM53eS8u2mWeG4ROcpmbgZlMTxHzc33kVPJcm3l77+izbt+Vn1cZzLLt2yXVMVMKNodcye8TD9RPRWMWpHyUz4zs0/lbt5eY+trWm7WdRGL5NcPGChtcPNf2jurzzED3KzAdeS97GWy6WGSdU2pdmxpabqa3ZSzIqb9mPgHtbCMYvUcFgXhpIT1V8kAUSDjb1eGvjCmtv+zzGc1je2P4a2ltmN9AEYCpSqTk7/kNt0Irw6yolT1RU/Y3n43oa/+5QHm100PzN0ZRzZ4tY4YlzKIbveXNIxf9loEo+iyzjeoKAOScYS28xWthd/FjXTJ87kXNH1ub/sy4K8y5WUD8rzNotucGl+BRcxftMjhdR1IshHeOyTTbn9scSDqRyewGMzN0CSlAhmnAN7+ALfhobBypgfjSslMw4OQ=
 notifications:
   email:
     on_failure: always
